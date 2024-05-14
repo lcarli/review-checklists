@@ -87,19 +87,17 @@
     },
     "functions": [],
     "variables": {
-        "mysql_api_version": "2017-12-01",
+        "mysql_api_version": "2021-05-01-preview",
         "identity_api_version": "2018-11-30",
         "roleassignment_api_version": "2020-04-01-preview",
         "aci_api_version": "2019-12-01",
-        "skuName": "B_Gen5_1",
-        "skuFamily": "Gen5",
+        "skuName": "Standard_B1ms",
+        "skuTier": "Burstable",
         "skuCapacity": 1,
-        "skuTier": "Basic",
-        "skuSizeMB": 5120,
         "mySqlVersion": "5.7",
         "backupRetentionDays": 7,
         "geoRedundantBackup": "Disabled",
-        "sslEnforcement": "Disabled",
+        "sslEnforcement": "Enabled",
         "firewallrules": [
             {
                 "Name": "permitAll",
@@ -119,27 +117,33 @@
     },
     "resources": [
         {
-            "type": "Microsoft.DBforMySQL/servers",
+            "type": "Microsoft.DBforMySQL/flexibleServers",
             "apiVersion": "[variables('mysql_api_version')]",
             "name": "[parameters('serverName')]",
             "location": "[parameters('location')]",
             "sku": {
                 "name": "[variables('skuName')]",
                 "tier": "[variables('skuTier')]",
-                "capacity": "[variables('skuCapacity')]",
-                "size": "[format('{0}', variables('skuSizeMB'))]",
-                "family": "[variables('skuFamily')]"
+                "capacity": "[variables('skuCapacity')]"
             },
             "properties": {
-                "createMode": "Default",
-                "version": "[variables('mysqlVersion')]",
+                "version": "[variables('mySqlVersion')]",
                 "administratorLogin": "[parameters('administratorLogin')]",
                 "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
-                "sslEnforcement": "[variables('sslEnforcement')]",
-                "storageProfile": {
-                    "storageMB": "[variables('skuSizeMB')]",
+                "storage": {
+                    "storageSizeGB": 20
+                },
+                "backup": {
                     "backupRetentionDays": "[variables('backupRetentionDays')]",
                     "geoRedundantBackup": "[variables('geoRedundantBackup')]"
+                },
+                "network": {
+                    "publicNetworkAccess": "Enabled",
+                    "delegatedSubnetResourceId": "",
+                    "privateDnsZoneArmResourceId": ""
+                },
+                "highAvailability": {
+                    "mode": "Disabled"
                 }
             }
         },
@@ -150,15 +154,15 @@
                 "mode": "serial",
                 "batchSize": 1
             },
-            "type": "Microsoft.DBforMySQL/servers/firewallRules",
+            "type": "Microsoft.DBforMySQL/flexibleServers/firewallRules",
             "apiVersion": "[variables('mysql_api_version')]",
             "name": "[format('{0}/{1}', parameters('serverName'), variables('firewallrules')[copyIndex()].Name)]",
             "properties": {
-            "startIpAddress": "[variables('firewallrules')[copyIndex()].StartIpAddress]",
-            "endIpAddress": "[variables('firewallrules')[copyIndex()].EndIpAddress]"
+                "startIpAddress": "[variables('firewallrules')[copyIndex()].StartIpAddress]",
+                "endIpAddress": "[variables('firewallrules')[copyIndex()].EndIpAddress]"
             },
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('serverName'))]"
+                "[resourceId('Microsoft.DBforMySQL/flexibleServers', parameters('serverName'))]"
             ]
         },
         {
@@ -167,7 +171,7 @@
             "name": "[variables('filldbName')]",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('serverName'))]"
+                "[resourceId('Microsoft.DBforMySQL/flexibleServers', parameters('serverName'))]"
             ],
             "properties": {
                 "initContainers": [],
@@ -191,7 +195,7 @@
                                 },
                                 {
                                     "name": "MYSQL_FQDN",
-                                    "value": "[reference(resourceId('Microsoft.DBforMySQL/servers', parameters('serverName'))).fullyQualifiedDomainName]"
+                                    "value": "[reference(resourceId('Microsoft.DBforMySQL/flexibleServers', parameters('serverName'))).fullyQualifiedDomainName]"
                                 }
                             ],
                             "ports": [],
@@ -236,7 +240,7 @@
                                 },
                                 {
                                     "name": "MYSQL_FQDN",
-                                    "value": "[reference(resourceId('Microsoft.DBforMySQL/servers', parameters('serverName'))).fullyQualifiedDomainName]"
+                                    "value": "[reference(resourceId('Microsoft.DBforMySQL/flexibleServers', parameters('serverName'))).fullyQualifiedDomainName]"
                                 },
                                 {
                                     "name": "AZURE_TENANT_ID",
@@ -311,7 +315,7 @@
                                 },
                                 {
                                     "name": "MYSQL_FQDN",
-                                    "value": "[reference(resourceId('Microsoft.DBforMySQL/servers', parameters('serverName'))).fullyQualifiedDomainName]"
+                                    "value": "[reference(resourceId('Microsoft.DBforMySQL/flexibleServers', parameters('serverName'))).fullyQualifiedDomainName]"
                                 },
                                 {
                                     "name": "WAIT_INTERVALS",
@@ -373,7 +377,7 @@
                                 },
                                 {
                                     "name": "MYSQL_FQDN",
-                                    "value": "[reference(resourceId('Microsoft.DBforMySQL/servers', parameters('serverName'))).fullyQualifiedDomainName]"
+                                    "value": "[reference(resourceId('Microsoft.DBforMySQL/flexibleServers', parameters('serverName'))).fullyQualifiedDomainName]"
                                 }
                             ],
                             "ports": [
