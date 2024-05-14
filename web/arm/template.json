@@ -138,9 +138,7 @@
                     "geoRedundantBackup": "[variables('geoRedundantBackup')]"
                 },
                 "network": {
-                    "publicNetworkAccess": "Enabled",
-                    "delegatedSubnetResourceId": "",
-                    "privateDnsZoneArmResourceId": ""
+                    "publicNetworkAccess": "Enabled"
                 },
                 "highAvailability": {
                     "mode": "Disabled"
