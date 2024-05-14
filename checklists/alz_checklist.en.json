@@ -9,7 +9,8 @@
             "guid": "70c15989-c726-42c7-b0d3-24b7375b9201",
             "id": "A01.01",
             "severity": "Medium",
-            "link": "https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/design-area/multi-tenant/considerations-recommendations"
+            "link": "https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/design-area/multi-tenant/considerations-recommendations",
+            "graph": "resources | where type == 'microsoft.security/securitycontacts' | project subscriptionId, properties.email, properties.alertNotifications"
         },
         {
             "category": "Azure Billing and Microsoft Entra ID Tenants",
